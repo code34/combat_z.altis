@@ -148,11 +148,11 @@
 			_key = _this;
 			_can = true;
 			_boundaries = MEMBER("getNumberNeighour", _key);
-			if(_boundaries < 4) then {
+			if(_boundaries < 3) then {
 				_cross = ["getSectorCrossAround", [_key]] call _grid;
 				{
 					_boundaries = MEMBER("getNumberNeighour", _x);
-					if(_boundaries > 3) then {_can = false;};
+					if(_boundaries > 2) then {_can = false;};
 					sleep 0.0000001;
 				}foreach _cross;
 			} else {

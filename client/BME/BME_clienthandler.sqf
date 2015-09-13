@@ -26,6 +26,10 @@
 		bme_message = _this select 0;
 		hint bme_message;
 	};
+
+	BME_netcode_wcscream = {
+		(_this select 0) say format["zomb%1", round random (6)];
+	};
 	
 	BME_netcode_vehicleavalaible = {
 		private ["_alive"];

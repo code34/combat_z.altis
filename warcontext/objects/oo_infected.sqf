@@ -91,6 +91,8 @@
 			_run = true;
 			_target =MEMBER("target", nil);
 			_zombie = MEMBER("zombie", nil);
+
+			
 			(group _zombie) setSpeedMode "FULL";
 			(group _zombie) setCombatMode "RED";
 			(group _zombie) setBehaviour "CARELESS";
@@ -115,11 +117,23 @@
 		};
 
 		PUBLIC FUNCTION("", "attack") {
+			private ["_target"];
+
+			wcscream = MEMBER("zombie", nil);
+			["wcscream", "client"] call BME_fnc_publicvariable;
+
 			MEMBER("zombie", nil) dowatch MEMBER("target", nil);
 			MEMBER("zombie", nil) switchMove "AwopPercMstpSgthWnonDnon_end";
-			MEMBER("zombie", nil) say format["zomb%1", round random (6)];
-			_damage = getdammage MEMBER("target", nil);
-			MEMBER("target", nil) setdammage ( _damage+ random 1);
+			//MEMBER("zombie", nil) say format["zomb%1", round random (6)];
+			
+			_target = MEMBER("target", nil);
+			if(vehicle _target == _target) then {
+				_damage = getdammage MEMBER("target", nil);
+				MEMBER("target", nil) setdammage ( _damage+ random 1);
+			} else{
+				_damage = getdammage (vehicle _target);
+				(vehicle _target)  setdammage ( _damage+ random 1);
+			};
 		};			
 
 		PUBLIC FUNCTION("", "eat") {

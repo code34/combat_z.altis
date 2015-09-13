@@ -172,6 +172,14 @@
 		};
 	}];
 
+	quickGarbage = {
+		sleep 3;
+		hideBody _this;
+		sleep 10;
+		deletevehicle _this;
+		deletegroup (group _this);
+	};
+
 	_unit addeventhandler ['Killed', {
 		private ["_unit", "_killer", "_name", "_score", "_distance", "_weapon", "_playerkill", "_playerdeath"];
 
@@ -211,6 +219,9 @@
 
 		wcaideath = [name  _unit, _name, _weapon, _playerkill, _playerdeath];
 		["wcaideath", "client"] call BME_fnc_publicvariable;
+		_unit spawn quickGarbage;
 	}];
+
+
 
 	true;

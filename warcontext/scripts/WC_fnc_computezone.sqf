@@ -36,10 +36,19 @@
 		};
 	};
 
-	for "_x" from 0 to wcnumberofzone step 1 do {
-		_key = _sectors call BIS_fnc_selectRandom;
+
+	_locations = nearestLocations [ [15000,15000], ["NameCityCapital","NameCity","NameVillage"], 15000];
+	{
+		_position = position _x;
+		_key = ["getSectorFromPos", _position] call global_grid;
 		["expandSector", _key] call global_controller;
 		["expandSectorAround", [_key, 10]] call global_controller;
+	}foreach _locations;
+
+	for "_x" from 0 to 50 step 1 do {
+		_key = _sectors call BIS_fnc_selectRandom;
+		["expandSector", _key] call global_controller;
+		["expandSectorAround", [_key, 3]] call global_controller;
 	};
 
 	{

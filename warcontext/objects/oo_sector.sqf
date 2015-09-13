@@ -28,10 +28,8 @@
 		PRIVATE VARIABLE("array","sector");
 		PRIVATE VARIABLE("scalar","state");
 		PRIVATE VARIABLE("array","position");
-		PRIVATE VARIABLE("array","unitstype");
+		PRIVATE VARIABLE("scalar","grpnumber");
 		PRIVATE VARIABLE("array","units");
-		PRIVATE VARIABLE("bool","artilleryactive");
-		PRIVATE VARIABLE("code","artillery");
 		PRIVATE VARIABLE("scalar","bucket");
 
 		PUBLIC FUNCTION("array","constructor") {
@@ -50,22 +48,15 @@
 			MEMBER("state", 0);
 			MEMBER("alert", false);
 
-			if(random 1 > 2) then { _sniper = 1; } else { _sniper = 0;};
-			if(random 1 > 2) then { _air = 1; } else { _air = 0; };
-			if(random 1 > 2) then { _vehicle = 1;} else { _vehicle = 0};
-
-			_type = [ 1, _sniper, _vehicle, _air];
-			MEMBER("unitstype", _type);
-			
-			if(random 1 > 2) then { MEMBER("artilleryactive", true);} else {MEMBER("artilleryactive", false);};
-			MEMBER("setMission", nil);
+			_number = 1 + random 5;
+			MEMBER("grpnumber", _number);			
+			//MEMBER("setMission", nil);
 		};
 
 		PUBLIC FUNCTION("","getIndex") FUNC_GETVAR("index");
 		PUBLIC FUNCTION("","getSector") FUNC_GETVAR("sector");
 		PUBLIC FUNCTION("","getMarker") FUNC_GETVAR("marker");
 		PUBLIC FUNCTION("","getAlert") FUNC_GETVAR("alert");
-		PUBLIC FUNCTION("","getArtillery") FUNC_GETVAR("artillery");
 		PUBLIC FUNCTION("","getPosition") FUNC_GETVAR("position");
 		PUBLIC FUNCTION("","getState") FUNC_GETVAR("state");
 
@@ -89,26 +80,6 @@
 			_mission = ["new", [_position]] spawn OO_MISSION;
 		};
 
-		PUBLIC FUNCTION("", "isArtillery") {
-			private ["_artillery", "_result"];
-			_result = false;
-			if(MEMBER("artilleryactive", nil)) then {
-				_artillery = "getVehicle" call MEMBER("artillery", nil);
-				if!(isnil "_artillery") then {
-					if(getdammage _artillery < 0.9) then { _result = true; } else { _result = false; };
-				};
-			};
-			_result;
-		};
-
-		PUBLIC FUNCTION("", "popArtillery") {
-			private ["_position", "_artillery"];
-			_position = [MEMBER("position", nil), 3000,5000,10,0,3,0] call BIS_fnc_findSafePos;
-
-			_artillery = ["new", [_position]] call OO_ARTILLERY;
-			MEMBER("artillery", _artillery);
-		};
-
 		PUBLIC FUNCTION("", "draw") {
 			private ["_marker"];
 			_marker = createMarker [format["mrk%1", MEMBER("index", nil)], MEMBER("position", nil)];
@@ -124,42 +95,19 @@
 		};
 
 		PUBLIC FUNCTION("", "popSector") {
-			private ["_marker", "_object", "_units", "_unitstype", "_type"];
+			private ["_marker", "_object", "_units", "_grpnumber", "_type"];
 
-			_unitstype = MEMBER("unitstype", nil);
+			_grpnumber = MEMBER("grpnumber", nil);
 			_units = [];
 			_object = MEMBER("getThis", nil);
 
-			if(MEMBER("artilleryactive", nil)) then {
-				MEMBER("popArtillery", nil);
-			};
-
 			MEMBER("alert", true);
 
-			for "_i" from 1 to (1 + random 10) step 1 do {
+			for "_i" from 1 to _grpnumber step 1 do {
 				_units = _units + MEMBER("popInfantry", nil);
 				sleep 0.01;
 			};
 
-			for "_i" from 1 to (_unitstype select 2) step 1 do {
-				_units = _units + MEMBER("popSniper", nil);
-				sleep 0.01;
-			};
-										
-			for "_i" from 1 to (_unitstype select 2) step 1 do {
-				_units = _units + MEMBER("popVehicle", nil);
-				sleep 0.01;
-			};
-		
-			for "_i" from 1 to (_unitstype select 3) step 1 do {
-				// air pop only one time
-				MEMBER("popAir", nil);
-				sleep 0.01;
-			};
-
-			_type = [ 1, (_unitstype select 1), (_unitstype select 2), 0];
-
-			MEMBER("unitstype", _type);;
 			MEMBER("units", _units);
 		};
 
@@ -181,10 +129,6 @@
 				deleteGroup _x;
 				sleep 0.01;
 			}foreach _group;
-
-			if(MEMBER("artilleryactive", nil)) then {
-				["delete", MEMBER("artillery", nil)] call OO_ARTILLERY;
-			};
 
 			_units = [];
 			MEMBER("units", _units);
@@ -335,87 +279,6 @@
 			units _group;
 		};
 
-		PRIVATE FUNCTION("", "popSniper") {
-			private ["_handle","_marker","_markersize","_markerpos","_type","_sector","_position","_group", "_position2"];
-
-			_marker 	=  MEMBER("marker", nil);		
-			_markerpos 	= getmarkerpos _marker;
-			_markersize 	= (getMarkerSize _marker) select 1;
-
-			_type = wcinfantrysnipers call BIS_fnc_selectRandom;
-
-			_position = [_markerpos, 0,50,1,0,3,0] call BIS_fnc_findSafePos;
-			_position2 = getArray(configFile >> "CfgWorlds" >> worldName >> "centerPosition");
-			if(_position isequalto _position2)  exitwith {[];};			
-
-			_group = [_position, east, (configfile >> "CfgGroups" >> "East" >> "OPF_F" >> "infantry" >> _type)] call BIS_fnc_spawnGroup;
-		
-			{
-				_handle = [_x, _type] spawn WC_fnc_setskill;
-				sleep 0.1;
-			}foreach (units _group);
-		
-			_patrol = ["new", [_group, MEMBER("getThis", nil), _markersize]] call OO_PATROL;
-			"patrol" spawn _patrol;
-		
-			units _group;
-		};
-
-
-		PRIVATE FUNCTION("", "popVehicle") {
-			private ["_array","_handle","_marker","_markersize","_markerpos","_type","_sector","_position","_group","_units","_vehicle", "_position2"];
-		
-			_marker		=  MEMBER("marker", nil);
-			_markerpos 		= getmarkerpos _marker;
-			_markersize		= (getMarkerSize _marker) select 1;
-		
-			if(random 1 > 0.5) then {
-				_vehicle = wclightvehicles call BIS_fnc_selectRandom;
-			} else {
-				_vehicle = wcheavyvehicles call BIS_fnc_selectRandom;
-			};
-		
-			//_position = [_markerpos, random (_markersize -15), random 359] call BIS_fnc_relPos;
-			_position = [_markerpos, 0,50,1,0,3,0] call BIS_fnc_findSafePos;
-			_position2 = getArray(configFile >> "CfgWorlds" >> worldName >> "centerPosition");
-			if(_position isequalto _position2)  exitwith {[];};						
-		
-			_array = [_position, random 359, _vehicle, east] call bis_fnc_spawnvehicle;
-		
-			_vehicle = _array select 0;
-			_group = _array select 2;
-			_vehicle setVehicleLock "LOCKED";
-
-			_handle = [_vehicle] spawn WC_fnc_vehiclehandler;		
-			_handle = [_group, MEMBER("position", nil), 400, MEMBER("getThis", nil)] spawn WC_fnc_patrol;
-		
-			{
-				_handle = [_x, ""] spawn WC_fnc_setskill;
-				sleep 0.1;
-			}foreach (units _group);
-		
-			_units = units _group + [_vehicle];
-			_units;
-		};
-
-		PRIVATE FUNCTION("", "popAir") {
-			private ["_patrol", "_airport", "_array", "_marker", "_position", "_list"];
-			_airport = "countEast" call global_atc;
-			
-			if(_airport > 0) then {
-				_array = "getEast" call global_atc;
-				_marker =  _array call BIS_fnc_selectRandom;
-				_position = getmarkerpos _marker;
-				_position = [_position select 0, _position select 1, 100];		
-				_list = _position nearEntities [["Man", "Tank"], 600];
-				sleep 0.2;
-				if(west countside _list == 0) exitwith {
-					_patrol = ["new", [MEMBER("getThis", nil), _position]] call OO_PATROLAIR;
-					"patrol" spawn _patrol;	
-				};
-			};
-		};
-
 
 		PUBLIC FUNCTION("","deconstructor") { 
 			DELETE_VARIABLE("alert");
@@ -427,10 +290,7 @@
 			DELETE_VARIABLE("sector");
 			DELETE_VARIABLE("position");
 			DELETE_VARIABLE("units");
-			DELETE_VARIABLE("unitstype");
+			DELETE_VARIABLE("grpnumber");
 			DELETE_VARIABLE("state");
-			DELETE_VARIABLE("artilleryactive");
-			["delete", MEMBER("artillery", nil)] call OO_ARTILLERY;
-			DELETE_VARIABLE("artillery");
 		};
 	ENDCLASS;

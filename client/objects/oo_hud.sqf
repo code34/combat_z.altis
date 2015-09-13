@@ -193,20 +193,6 @@
 					_time = _time  + 1;
 				};
 
-				_ctrl7 =(uiNamespace getVariable "wcdisplay") displayCtrl 1005;
-				if(wcwithrollmessages) then {
-					_ctrl7 ctrlSetStructuredText parsetext rollprintmessage;
-					if(rollprintmessage == "") then {
-						_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
-					} else {
-						_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
-					};
-				} else {
-					_ctrl7 ctrlSetStructuredText parsetext "";
-					_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
-				};
-
-
 				_dir = getdir player;
 				if((_dir > 340) or (_dir < 20)) then {_direction = "N"};
 				if((_dir > 19) and (_dir < 70)) then {_direction = "NE"};
@@ -243,7 +229,6 @@
 				_ctrl4 ctrlcommit 0;
 				_ctrl5 ctrlcommit 0;
 				_ctrl6 ctrlcommit 0;
-				_ctrl7 ctrlcommit 0;
 				_ctrl8 ctrlcommit 0;
 				_ctrl9 ctrlcommit 0;
 				_ctrl10 ctrlcommit 0;
@@ -254,7 +239,8 @@
 		};
 
 		PUBLIC FUNCTION("", "rollMessage") {
-			private ["_temp"];
+			private ["_temp", "_ctrl7"];
+			disableSerialization;
 
 			while { true } do {
 				_temp = "";
@@ -263,8 +249,22 @@
 					_temp =  _temp  + "<t shadow='1' size='1.2' >" + _x + "</t>";
 				}foreach rollmessage;
 				rollprintmessage = _temp;
+				
+				_ctrl7 =(uiNamespace getVariable "wcdisplay") displayCtrl 1005;
+				if(wcwithrollmessages) then {
+					_ctrl7 ctrlSetStructuredText parsetext rollprintmessage;
+					if(rollprintmessage == "") then {
+						_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
+					} else {
+						_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
+					};
+				} else {
+					_ctrl7 ctrlSetStructuredText parsetext "";
+					_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
+				};
+				_ctrl7 ctrlcommit 0;
 				rollmessage deleteat 0;
-				sleep 1.5;
+				sleep 0.5;
 			};
 		};
 
@@ -286,7 +286,7 @@
 					private ['_code', '_vehicle', '_rank', '_img', '_color'];
 					if(vehicle player == player) then {
 						{	
-							if(_x distance player < 1) then {
+							if(_x distance player < 25) then {
 								_vehicle = _x;
 								_rank = rank _vehicle;
 								_img = [_rank, 'texture'] call BIS_fnc_rankParams;
@@ -299,7 +299,7 @@
 								_color set [3, 1 - _distance];
 								 drawIcon3D [_img, _color, [ visiblePosition _vehicle select 0, visiblePosition _vehicle select 1, (visiblePosition _vehicle select 2) + 1.9 ], 1, 1, 0, name _vehicle, 2, 0.03, 'PuristaMedium' ];
 							 };
-						}foreach allunits;
+						}foreach playableUnits;
 					};
 			";
 			_code;

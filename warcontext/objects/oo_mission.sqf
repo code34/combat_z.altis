@@ -144,12 +144,14 @@
 			_type = "Box_FIA_Wps_F";
 
 			_vehicle = createVehicle [_type, _position,[], 0, "NONE"];
+			["AmmoboxInit",[_vehicle,true,{true}]] spawn BIS_fnc_arsenal;
+
 			MEMBER("target", _vehicle);
 
 			_counter = 3600;
 			_run = true;
 
-			_text= "Destroy " + getText (configFile >> "CfgVehicles" >> (typeOf _vehicle) >> "DisplayName");
+			_text= "Get " + getText (configFile >> "CfgVehicles" >> (typeOf _vehicle) >> "DisplayName");
 			MEMBER("setMarker", _text);	
 			_win = false;
 
