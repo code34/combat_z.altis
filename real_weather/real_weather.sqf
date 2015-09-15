@@ -133,7 +133,7 @@
 			wcweather set [4, date];
 			publicvariable "wcweather";
 			if(!_realtime) then { 
-				if((date select 3 > 22) or (date select 3 <6)) then {
+				if((date select 3 > 23) or (date select 3 <6)) then {
 					setTimeMultiplier _nighttimeratio;
 				} else {
 					setTimeMultiplier _daytimeratio;
@@ -149,12 +149,12 @@
 
 	while {true} do {
 		_overcast = random 1;
-		if(_overcast > 0.70) then {
+		if(_overcast > 0.80) then {
 			_rain = random 1;
 		} else {
 			_rain = 0;
 		};
-		_fog = 0.4 + (random 0.4);
+		_fog = 0.6 + (random 0.4);
 		if(random 1 > 0.95) then {
 			_wind = [random 7, random 7, true];
 		} else {
