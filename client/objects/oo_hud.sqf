@@ -193,20 +193,26 @@
 					_time = _time  + 1;
 				};
 
-				_dir = getdir player;
-				if((_dir > 340) or (_dir < 20)) then {_direction = "N"};
-				if((_dir > 19) and (_dir < 70)) then {_direction = "NE"};
-				if((_dir > 69) and (_dir < 110)) then {_direction = "E"};
-				if((_dir > 109) and (_dir < 160)) then {_direction = "SE"};
-				if((_dir > 159) and (_dir < 210)) then {_direction = "S"};
-				if((_dir > 209) and (_dir < 250)) then {_direction = "SW"};
-				if((_dir > 249) and (_dir < 290)) then {_direction = "W"};
-				if((_dir > 289) and (_dir < 340)) then {_direction = "NW"};
+				_ctrl7 =(uiNamespace getVariable "wcdisplay") displayCtrl 1005;
+				if(wcwithrollmessages) then {
+					_ctrl7 ctrlSetStructuredText parsetext rollprintmessage;
+					if(rollprintmessage == "") then {
+						_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
+					} else {
+						_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
+					};
+				} else {
+					_ctrl7 ctrlSetStructuredText parsetext "";
+					_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
+				};
+
+
+				_direction = format["%1°", round(getdir player)];
 
 				if(vehicle player == player) then {
 					_ctrl8 =(uiNamespace getVariable "wcdisplay") displayCtrl 1017;
 					_sector = ["getSectorFromPos", position player] call client_grid;
-					_ctrl8 ctrlSetStructuredText parsetext format ["SECTOR %1%2 - %3", _sector select 0, _sector select 1, _direction];
+					_ctrl8 ctrlSetStructuredText parsetext format ["<t shadow='1' size='0.9' >SECTOR %1%2 - %3", _sector select 0, _sector select 1, _direction];
 					_ctrl8 ctrlSetBackgroundColor [0,0,0,0.5];	
 				} else {
 					_ctrl8 =(uiNamespace getVariable "wcdisplay") displayCtrl 1017;
@@ -229,6 +235,7 @@
 				_ctrl4 ctrlcommit 0;
 				_ctrl5 ctrlcommit 0;
 				_ctrl6 ctrlcommit 0;
+				_ctrl7 ctrlcommit 0;
 				_ctrl8 ctrlcommit 0;
 				_ctrl9 ctrlcommit 0;
 				_ctrl10 ctrlcommit 0;
@@ -239,8 +246,7 @@
 		};
 
 		PUBLIC FUNCTION("", "rollMessage") {
-			private ["_temp", "_ctrl7"];
-			disableSerialization;
+			private ["_temp"];
 
 			while { true } do {
 				_temp = "";
@@ -249,22 +255,8 @@
 					_temp =  _temp  + "<t shadow='1' size='1.2' >" + _x + "</t>";
 				}foreach rollmessage;
 				rollprintmessage = _temp;
-				
-				_ctrl7 =(uiNamespace getVariable "wcdisplay") displayCtrl 1005;
-				if(wcwithrollmessages) then {
-					_ctrl7 ctrlSetStructuredText parsetext rollprintmessage;
-					if(rollprintmessage == "") then {
-						_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
-					} else {
-						_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
-					};
-				} else {
-					_ctrl7 ctrlSetStructuredText parsetext "";
-					_ctrl7 ctrlSetBackgroundColor [0, 0, 0, 0];
-				};
-				_ctrl7 ctrlcommit 0;
 				rollmessage deleteat 0;
-				sleep 0.5;
+				sleep 1.5;
 			};
 		};
 
@@ -286,11 +278,11 @@
 					private ['_code', '_vehicle', '_rank', '_img', '_color'];
 					if(vehicle player == player) then {
 						{	
-							if(_x distance player < 25) then {
+							if(_x distance player < 30) then {
 								_vehicle = _x;
 								_rank = rank _vehicle;
 								_img = [_rank, 'texture'] call BIS_fnc_rankParams;
-								_distance = (player distance _vehicle) / 25;
+								_distance = (player distance _vehicle) / 30;
 								if(side _vehicle == west) then {
 									_color = getArray (configFile/'CfgInGameUI'/'SideColors'/'colorFriendly');
 								} else {
@@ -299,7 +291,7 @@
 								_color set [3, 1 - _distance];
 								 drawIcon3D [_img, _color, [ visiblePosition _vehicle select 0, visiblePosition _vehicle select 1, (visiblePosition _vehicle select 2) + 1.9 ], 1, 1, 0, name _vehicle, 2, 0.03, 'PuristaMedium' ];
 							 };
-						}foreach playableUnits;
+						}foreach allunits;
 					};
 			";
 			_code;
