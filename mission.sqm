@@ -18,7 +18,7 @@ class Mission
 	randomSeed=12604725;
 	class Intel
 	{
-		briefingName="COMBAT Z 0.5";
+		briefingName="COMBAT Z 0.51";
 		overviewText="By Code34 - www.combat-assault.eu";
 		resistanceWest=0;
 		resistanceEast=1;
@@ -519,10 +519,10 @@ class Mission
 	};
 	class Markers
 	{
-		items=31;
+		items=32;
 		class Item0
 		{
-			position[]={13558.62,16.108418,12100.498};
+			position[]={13557.239,16.225101,12100.19};
 			name="respawn_west";
 			type="Empty";
 		};
@@ -820,6 +820,13 @@ class Mission
 			colorName="ColorUNKNOWN";
 			a=0.5;
 			b=0.5;
+		};
+		class Item31
+		{
+			position[]={13549.415,16.215792,12100.384};
+			name="base_lamp";
+			text="base_lamp";
+			type="Empty";
 		};
 	};
 };
