@@ -45,19 +45,17 @@
 		["expandSectorAround", [_key, 10]] call global_controller;
 	}foreach _locations;
 
-	for "_x" from 0 to 50 step 1 do {
+	for "_x" from 0 to 100 step 1 do {
 		_key = _sectors call BIS_fnc_selectRandom;
 		["expandSector", _key] call global_controller;
 		["expandSectorAround", [_key, 3]] call global_controller;
 	};
 
 	{
-		if(random 1 > 0.75) then {
 			_position = getmarkerpos _x;
 			_sector = ["getSectorFromPos", _position] call global_grid;
 			["expandSector", _sector] call global_controller;
 			["expandSectorAround", [_sector, 5]] call global_controller;
-		};
 	} foreach ["viking","hurricane","crocodile", "coconuts", "liberty"];
 
 	{
