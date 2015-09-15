@@ -18,11 +18,14 @@
 
 	private ["_action", "_body", "_dir", "_index", "_position", "_mark", "_group", "_units", "_view"];
 
+	waitUntil {BIS_fnc_init;};
+	waitUntil {time > 0};
+	waitUntil {getClientState == "BRIEFING READ"};
+	
 	WC_fnc_spawndialog = compilefinal preprocessFileLineNumbers "client\scripts\spawndialog.sqf";
-	WC_fnc_teleport = compilefinal preprocessFile "client\scripts\teleport.sqf";
+	WC_fnc_teleport = compilefinal preprocessFileLineNumbers "client\scripts\teleport.sqf";
 	WC_fnc_keymapperup = compilefinal preprocessFileLineNumbers "client\scripts\WC_fnc_keymapperup.sqf";
 	WC_fnc_keymapperdown = compilefinal preprocessFileLineNumbers "client\scripts\WC_fnc_keymapperdown.sqf";
-
 	
 	call compilefinal preprocessFileLineNumbers "client\scripts\task.sqf";
 	call compilefinal preprocessFileLineNumbers "client\objects\oo_circularlist.sqf";
@@ -63,8 +66,7 @@
 
 	[] execVM "real_weather\real_weather.sqf";
 
-	sleep 1;
-	enableEnvironment false;
+	if(wcambiant ==2) then {enableEnvironment false;};
 
 	player addEventHandler ['Killed', {
 		private ["_name", "_weapon"];
@@ -111,7 +113,7 @@
 			if(_oldplayertype != playertype) then {
 				_oldplayertype = playertype;
 				player removeAction _action;
-				_action = nil;				
+				_action = nil;
 			};
 			if(vehicle player == player) then {
 				if(isnil "_action") then {
@@ -141,40 +143,42 @@
 
 	if(wcredeployement isEqualTo 1) then {
 		[] spawn {
-			private ["_list", "_counter", "_text"];
+			private ["_list", "_list2", "_counter", "_text", "_candeploy", "_teleport"];
+			
 			_counter = 10;
+			_teleport = nil;
 
 			while { true } do {
-				_list = position player nearEntities [["Man", "Tank"], 1000];
+				_list = position player nearEntities [["Man"], 1000];
+				_list2 = position player nearEntities [["Tank"], 1000];
 				sleep 1;
+				{
+					_list = _list + crew _x;
+					sleep 0.001;
+				}foreach _list2;
+
+				_candeploy = false;
 				if(player distance getmarkerpos "respawn_west" > 1300) then {
 					if((alive player) and (vehicle player == player)) then {		
 						if( (east countSide _list == 0) and (resistance countSide _list == 0) ) then {
-							if(stance player == "CROUCH") then {
-								if(_counter < 10) then {
-									_title = localize "STR_REDEPLOY_TITLE";
-									_text = format ["%1<br/><t size='3'>%2</t>", localize "STR_REDEPLOY_COUNTER", _counter];
-									["hint", [_title, _text]] call hud;
-								};
-								_counter = _counter - 1 ;
-							} else {
-								_title = localize "STR_REDEPLOY_TITLE";
-								_text = localize "STR_REDEPLOY_STANCE";
-								_counter = 10;
-								["hint", [_title, _text]] call hud;
-							};
+							_title = localize "STR_REDEPLOY_TITLE";
+							_text = localize "STR_REDEPLOY_STANCE";
+							["hint", [_title, _text]] call hud;
+							_candeploy = true;
 						} else {
-							sleep 5;
-							hintsilent "";
-							_counter = 10;
+							hint "";
 						};
-						if(_counter < 0) then {
-							_counter = 10;
-							hintsilent "";
-							[player] call WC_fnc_spawndialog;
-						};
-					} else {
-						_counter = 10;
+					};
+				};
+
+				if(_candeploy) then {
+					if(isnil "_teleport") then {
+						_teleport = player addAction ["Deployement", "client\scripts\deployment.sqf", nil, 1.5, false];
+					};
+				} else {
+					if(!isnil "_teleport") then {
+						player removeAction _teleport;
+						_teleport = nil;
 					};
 				};
 			};
