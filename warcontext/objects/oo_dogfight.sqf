@@ -62,14 +62,20 @@
 			}foreach MEMBER("squadron", nil);
 		};
 
+		// Defini la taille de l'escadre
 		PUBLIC FUNCTION("", "setSquadronSize") {
 			private ["_array", "_ground", "_air", "_size"];
 
+			// compte le nombre de vehicules au sol bluefor
 			_ground = count MEMBER("groundtargets", nil);
+
+			// compte le nombre d avions bluefor
 			_air = count MEMBER("airtargets", nil);
 
+			// la taille de l escadre ne peut pas etre superieur a 6
 			_size = _ground + (2 * _air);
 			if(_size > 6) then { _size = 6;};
+
 			MEMBER("squadronsize", _size);		
 		};
 
@@ -129,7 +135,6 @@
 			if(count MEMBER("target", nil) > 0) then {
 				_target = MEMBER("target", nil) select 0;
 				_squadron = MEMBER("squadron", nil);
-				diag_log format ["oo_dogfight squadron %1", _squadron];
 				
 				{
 					_vehicle = _x select 0;
@@ -169,6 +174,7 @@
 			private ["_target"];
 			
 			_target = MEMBER("target", nil);
+
 			while { count _target == 0} do {
 				MEMBER("detectTargets", nil);
 				MEMBER("setTarget", nil);
