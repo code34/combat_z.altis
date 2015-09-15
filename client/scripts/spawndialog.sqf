@@ -32,6 +32,8 @@
 	wcaction = "";
 
 	createDialog "spawndialog"; 
+	sleep 1;
+	
 	_ctrl = (uiNamespace getVariable 'wcspawndialog') displayCtrl 4005;
 	if(wcwithrollmessages) then {
 		_ctrl ctrlSetText "ROLLMESSAGE ON";
@@ -124,10 +126,17 @@
 					ctrlMapAnimCommit _ctrl;					
 
 					detach _cam;
-					_cam cameraEffect ["internal", "BACK"];
-					_cam camSetTarget _player;
-					_cam attachto [_player,[0.7,-2,0], "neck"];
-					_cam CamCommit 0;			
+					if(vehicle _player == _player) then {
+						_cam cameraEffect ["internal", "BACK"];
+						_cam camSetTarget _player;
+						_cam attachto [_player,[0.7,-2,0], "neck"];
+						_cam CamCommit 0;
+					} else {
+						_cam cameraEffect ["internal", "BACK"];
+						_cam camSetTarget (vehicle _player);
+						_cam attachto [(vehicle _player),[0,-50,0], "neck"];
+						_cam CamCommit 0;
+					};
 				};
 				wcchange  = false;
 			};
