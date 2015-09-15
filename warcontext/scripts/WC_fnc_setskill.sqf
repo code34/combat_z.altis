@@ -222,6 +222,4 @@
 		_unit spawn quickGarbage;
 	}];
 
-
-
 	true;
