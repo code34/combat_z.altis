@@ -25,8 +25,16 @@
 		PRIVATE VARIABLE("object","target");
 
 		PUBLIC FUNCTION("object","constructor") {
+			_this setSpeaker "NoVoice";
 			MEMBER("zombie", _this);
 			MEMBER("setInventory", _this);
+			_this setDamage 0.75;
+/*			_this addEventHandler ["AnimStateChanged", {
+				if(random 1 > 0.7) then {
+					_move = ["ApanPercMstpSnonWnonDnon_G01"];
+					(_this select 0) switchMove "ApanPercMstpSnonWnonDnon_G01";
+				};
+			}];*/
 		};
 
 		PUBLIC FUNCTION("object","setInventory") {
@@ -113,7 +121,13 @@
 		};
 
 		PUBLIC FUNCTION("", "moveTo") {
-			MEMBER("zombie", nil) domove getposatl MEMBER("target", nil);
+			private _distance = MEMBER("target", nil) distance MEMBER("zombie", nil);
+			if(_distance < 30) then {
+				MEMBER("zombie", nil) domove (getpos MEMBER("target", nil));
+			} else {
+				private _pos =  MEMBER("target", nil) getRelPos [20, 20];
+				MEMBER("zombie", nil) domove _pos;
+			};
 		};
 
 		PUBLIC FUNCTION("", "attack") {
@@ -124,7 +138,6 @@
 
 			MEMBER("zombie", nil) dowatch MEMBER("target", nil);
 			MEMBER("zombie", nil) switchMove "AwopPercMstpSgthWnonDnon_end";
-			//MEMBER("zombie", nil) say format["zomb%1", round random (6)];
 			
 			_target = MEMBER("target", nil);
 			if(vehicle _target == _target) then {
